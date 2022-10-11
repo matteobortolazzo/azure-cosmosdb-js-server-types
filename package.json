@@ -1,10 +1,5 @@
 ﻿{
-  "name": "@types/azure-cosmosdb-js-server-beta",
+  "name": "@types/azure-cosmosdb-js-server",
   "version": "1.0.0",
-  "typings": "index.d.ts",
-  "private": false,
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  }
+  "typings": "index.d.ts"
 }

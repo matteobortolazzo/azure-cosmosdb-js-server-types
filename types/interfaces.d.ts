@@ -1,4 +1,8 @@
-﻿/**
+﻿/// <reference path="./callbacks.d.ts" />
+/// <reference path="./options.d.ts" />
+/// <reference path="./predicates.d.ts" />
+
+/**
  * SQL query string. This can also be an object to pass in a parameterized query along with the values.
  */
 type FilterQuery = string | { query: string, parameters: { name: string, value: any }[]};
@@ -205,7 +209,6 @@ interface Attachment {
     media: string;
 }
 
-
 /**
  * Object returned from a query function, namely chain, filter, map, pluck, flatten, or value.
  * If the query is part of a chained call, then this object can be used to chain further queries until the final terminating value call.
@@ -215,6 +218,109 @@ interface QueryResponse<TSource> {
      * True if the query has been queued, false if it is not queued because of a pending timeout.
      */
     isAccepted: boolean;
+
+    /**
+     * Execute a filter on the input stream of documents, resulting in a subset of the input stream that matches the given filter.
+     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
+     * 
+     * @param predicate Predicate function defining the filter
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    filter(predicate: FilterPredicate<TSource>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+
+    /**
+     * Flatten nested arrays from each document in the input document stream.
+     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
+     * 
+     * @param isShallow If true, flattens only the first level of nested arrays (false by default)
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    flatten(isShallow?: boolean, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+
+    /**
+     * Produce a new set of documents by mapping/projecting the properties of the documents in the input document stream through the given mapping predicate.
+     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
+     *  
+     * @param predicate Predicate function defining the projection
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    map<TResult>(predicate: ProjectionPredicate<TSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TResult>): QueryResponse<TSource>;
+
+    /**
+      * Produce a new set of documents by extracting a single property from each document in the input document stream. This is equivalent to a {@link map} call that projects only propertyName.
+      * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
+      * 
+      * @param propertyName Name of the property to pluck from all documents in the current collection
+      * @param options Optional query options. Should not be used in a {@link chain} call.
+      * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+      * 
+      * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+      */
+     pluck(propertyName: string, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+
+    /**
+     * Produce a new set of documents by sorting the documents in the input document stream in ascending order using the given predicate.
+     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
+     * 
+     * @param predicate Predicate function defining the property to sort by.
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    sortBy(predicate: SortByPredicate<TSource>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+
+    /**
+     * Produce a new set of documents by sorting the documents in the input document stream in descending order using the given predicate.
+     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
+     * 
+     * @param predicate Predicate function defining the property to sort by.
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    sortByDescending(predicate: SortByPredicate<TSource>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+
+    /**
+     * Performs a join with inner collection with both top level document item and inner collection item added to the result projection.
+     * When resultSelector is provided, resultSelector is called for each pair of <current document, inner collection item>.
+     * When resultSelector is not provided, {@link unwind} just adds inner collection to the result projection. In this case {@link unwind} is equivalent to `map(innerCollectionSelector).flatten()`. Calls to unwind can be chained to perform multiple joins.
+     * 
+     * @param innerCollectionSelector Predicate function defining the projection for inner collection.
+     * @param resultSelector Optional predicate function defining result projection.
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    unwind<TInnerSource, TResult>(innerCollectionSelector: ProjectionPredicate<TSource, TInnerSource>, resultSelector: ResultSelectorPredicate<TSource, TInnerSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TResult>;
+    
+    /**
+     * Terminating call for a chained query. Should be used in conjunction with the opening chain call to perform chained queries.
+     * When value is called, the query is queued for execution with the given options and callback.
+     * 
+     * @param options Optional query options. Should not be used in a {@link chain} call.
+     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
+     * 
+     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
+     */
+    value(options?: FeedOptions, callback?: RequestCallback<TSource> | FeedCallback<TSource>): QueryResponse<TSource>
 }
 
 /** Collection 
@@ -489,15 +595,4 @@ interface Collection {
      * @returns True if the create has been queued, false if it is not queued because of a pending timeout.
      */
     upsertDocument<TSource>(collectionLink: string, body: TSource, options?: UpsertOptions, callback?: RequestCallback<TSource & Document>): boolean;
-
-    /**
-     * Terminating call for a chained query. Should be used in conjunction with the opening chain call to perform chained queries.
-     * When value is called, the query is queued for execution with the given options and callback.
-     * 
-     * @param options Optional query options. Should not be used in a {@link chain} call.
-     * @param callback Optional callback for the operation. If no callback is provided, any error in the operation will be thrown and the result document set will be written to the {@link Response} body. Should not be used in a {@link chain} call.
-     * 
-     * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
-     */
-    value<TSource>(options?: FeedOptions, callback?: RequestCallback<TSource>): QueryResponse<TSource>
 }
