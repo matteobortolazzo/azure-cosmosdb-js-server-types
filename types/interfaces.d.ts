@@ -234,7 +234,7 @@ interface QueryResponse<TSource> {
 
     /**
      * Flatten nested arrays from each document in the input document stream.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When flatten is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
      * 
      * @param isShallow If true, flattens only the first level of nested arrays (false by default)
@@ -243,11 +243,11 @@ interface QueryResponse<TSource> {
      * 
      * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
      */
-    flatten(isShallow?: boolean, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+    flatten<TResult>(isShallow?: boolean, options?: FeedOptions, callback?: FeedCallback<TResult>): QueryResponse<TResult>;
 
     /**
      * Produce a new set of documents by mapping/projecting the properties of the documents in the input document stream through the given mapping predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When map is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
      *  
      * @param predicate Predicate function defining the projection
@@ -260,7 +260,7 @@ interface QueryResponse<TSource> {
 
     /**
       * Produce a new set of documents by extracting a single property from each document in the input document stream. This is equivalent to a {@link map} call that projects only propertyName.
-      * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+      * When pluck is called by itself, the input document stream is the set of all documents in the current document collection.
       * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
       * 
       * @param propertyName Name of the property to pluck from all documents in the current collection
@@ -269,11 +269,11 @@ interface QueryResponse<TSource> {
       * 
       * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
       */
-     pluck(propertyName: string, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
+    pluck(propertyName: string, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TSource>;
 
     /**
      * Produce a new set of documents by sorting the documents in the input document stream in ascending order using the given predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When sortBy is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
      * 
      * @param predicate Predicate function defining the property to sort by.
@@ -286,7 +286,7 @@ interface QueryResponse<TSource> {
 
     /**
      * Produce a new set of documents by sorting the documents in the input document stream in descending order using the given predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When sortByDescending is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
      * 
      * @param predicate Predicate function defining the property to sort by.
@@ -309,7 +309,7 @@ interface QueryResponse<TSource> {
      * 
      * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
      */
-    unwind<TInnerSource, TResult>(innerCollectionSelector: ProjectionPredicate<TSource, TInnerSource>, resultSelector: ResultSelectorPredicate<TSource, TInnerSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TResult>;
+    unwind<TInnerSource, TResult>(innerCollectionSelector: ProjectionPredicate<TSource, TInnerSource>, resultSelector: ResultSelectorPredicate<TSource, TInnerSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TResult>): QueryResponse<TResult>;
     
     /**
      * Terminating call for a chained query. Should be used in conjunction with the opening chain call to perform chained queries.
@@ -400,8 +400,8 @@ interface Collection {
 
     /**
      * Flatten nested arrays from each document in the input document stream.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
-     * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
+     * When flatten is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When used in a {@link chain} call, the input document stream is the set of documents returned from the previous query function.
      * 
      * @param isShallow If true, flattens only the first level of nested arrays (false by default)
      * @param options Optional query options. Should not be used in a {@link chain} call.
@@ -427,7 +427,7 @@ interface Collection {
 
     /**
      * Produce a new set of documents by mapping/projecting the properties of the documents in the input document stream through the given mapping predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When map is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
      *  
      * @param predicate Predicate function defining the projection
@@ -440,7 +440,7 @@ interface Collection {
 
     /**
      * Produce a new set of documents by extracting a single property from each document in the input document stream. This is equivalent to a {@link map} call that projects only propertyName.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When pluck is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function.
      * 
      * @param propertyName Name of the property to pluck from all documents in the current collection
@@ -534,7 +534,7 @@ interface Collection {
 
     /**
      * Produce a new set of documents by sorting the documents in the input document stream in ascending order using the given predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When sortBy is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
      * 
      * @param predicate Predicate function defining the property to sort by.
@@ -547,7 +547,7 @@ interface Collection {
 
     /**
      * Produce a new set of documents by sorting the documents in the input document stream in descending order using the given predicate.
-     * When filter is called by itself, the input document stream is the set of all documents in the current document collection.
+     * When sortByDescending is called by itself, the input document stream is the set of all documents in the current document collection.
      * When used in {@link chain} call, the input document stream is the set of documents returned from the previous query function. 
      * 
      * @param predicate Predicate function defining the property to sort by.
@@ -570,7 +570,7 @@ interface Collection {
      * 
      * @returns Response which contains whether or not the query was accepted. Can be used in a {@link chain} call to call further queries.
      */
-    unwind<TSource, TInnerSource, TResult>(innerCollectionSelector: ProjectionPredicate<TSource, TInnerSource>, resultSelector: ResultSelectorPredicate<TSource, TInnerSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TSource>): QueryResponse<TResult>;
+    unwind<TSource, TInnerSource, TResult>(innerCollectionSelector: ProjectionPredicate<TSource, TInnerSource>, resultSelector: ResultSelectorPredicate<TSource, TInnerSource, TResult>, options?: FeedOptions, callback?: FeedCallback<TResult>): QueryResponse<TResult>;
 
     /**
      * Upsert an attachment for the document.
