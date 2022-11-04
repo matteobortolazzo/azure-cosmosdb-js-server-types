@@ -1,5 +1,17 @@
 ﻿{
-  "name": "@types/azure-cosmosdb-js-server",
+  "name": "azure-cosmosdb-js-server-types",
+  "description": "TypeScript type definitions for the Azure CosmosDB JS Server SDK.",
   "version": "1.0.0",
+  "author": "Matteo Bortolazzo <matteobortolazzo@pm.me>",  
+  "homepage": "https://github.com/matteobortolazzo/azure-cosmosdb-js-server-types",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matteobortolazzo/azure-cosmosdb-js-server-types.git"
+  },
+  "bugs": {
+    "url": "https://github.com/matteobortolazzo/azure-cosmosdb-js-server-types/issues"
+  },
+  "keywords": ["cosmosdb"],
+  "license": "MIT",
   "typings": "index.d.ts"
 }
