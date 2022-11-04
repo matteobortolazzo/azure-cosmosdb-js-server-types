@@ -19,42 +19,47 @@ interface Address {
     city: string;
 }
 
-const result = __.chain<User>()
-    .filter(doc => doc.age > 30)
-    .sortBy(user => user.age)
-    .map(user => user.addresses)
-    .flatten<Address>()
-    .value(null, callback)
-if(!result.isAccepted)
-  throw new Error("The call was not accepted");
+function runQuery() {  
+    const result = __.chain<User>()
+        .filter(doc => doc.age > 30)
+        .sortBy(user => user.age)
+        .map(user => user.addresses)
+        .flatten<Address>()
+        .value(null, callback)
+    if(!result.isAccepted)
+    throw new Error("The call was not accepted");
 
-function callback(err: Error, items: Address[]) {
-    if(err) throw err;
+    function callback(err: Error, items: Address[]) {
+        if(err) throw err;
 
-    // or getContext().getResponse().setBody({    
-    __.response.setBody({
-        result: items
-    })
+        // or getContext().getResponse().setBody({    
+        __.response.setBody({
+            result: items
+        })
+    }  
 }
 ```
 
 It will be compiled to *JavaScript*:
 
 ```javascript
-var result = __.chain()
-    .filter(function (doc) { return doc.age > 30; })
-    .sortBy(function (user) { return user.age; })
-    .map(function (user) { return user.addresses; })
-    .flatten()
-    .value(null, callback);
-if (!result.isAccepted)
-    throw new Error("The call was not accepted");
-
-function callback(err, items) {
-    if (err)
-        throw err;
-    __.response.setBody({
-        result: items
-    });
+function runQuery() {
+    var result = __.chain()
+        .filter(function (doc) { return doc.age > 30; })
+        .sortBy(function (user) { return user.age; })
+        .map(function (user) { return user.addresses; })
+        .flatten()
+        .value(null, callback);
+    if (!result.isAccepted)
+        throw new Error("The call was not accepted");
+    function callback(err, items) {
+        if (err)
+            throw err;
+        // or getContext().getResponse().setBody({    
+        __.response.setBody({
+            result: items
+        });
+    }
 }
+
 ```
